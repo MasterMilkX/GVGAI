@@ -91,6 +91,8 @@ public class ADPChildRunner {
 		int gameIndex = Integer.parseInt(parameters.get("gameIndex"));
 		int idealTime = Integer.parseInt(parameters.get("idealLevelTime"));
 		double compareThresh = Double.parseDouble(parameters.get("constraintsThreshold")); 
+		double entropyProb = Double.parseDouble(parameters.get("derivFitnessProb"));
+		int donothingCt = Integer.parseInt(parameters.get("doNothingTestCt"));
 
 		//import the game list
 		HashMap<Integer, String[]> gameList = readGamesCSV(parameters.get("gameListCSV"));
@@ -136,7 +138,7 @@ public class ADPChildRunner {
 				//System.out.println(placeholderFile);
 				for(Chromosome c:chromosomes) {
 				    System.out.println("\t C" + id + ": Running Chromosome number: \t" + ++index + "/" + size + " (#" + (index+(id*size)) + ")");
-				    c.calculateResults(runner, placeholderFile, id);
+				    c.calculateResults(runner, placeholderFile, id, entropyProb, donothingCt);
 				}
 				
 				// 4.5c) delete old input files

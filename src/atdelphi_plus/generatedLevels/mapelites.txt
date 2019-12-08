@@ -1,74 +1,54 @@
 GAME: zelda
-TOTAL CELLS: 6
-[0101]
-wwwwwwwwwwwwwww
-w+      2   1 w
-ww  2    + 2  w
-w     g+  A   w
-w   3         w
-w.            w
-w          2  w
-w  .1g3       w
-w  3    .  +  w
-wwwwwwwwwwwwwww
+TOTAL CELLS: 3
 
-[1101]
-wwwwwwwwwwwwwww
-w+      2   1 w
-ww  2      2  w
-w     g+      w
-w   3         w
-w.            w
-w          2  w
-w  .1g3       w
-w  3    A     w
-wwwwwwwwwwwwwww
 
-[1111]
-wwwwwwwwwwwwwww
-w+      2   1 w
-ww  2    + 2  w
-w     g+  A + w
-w   3       . w
-w.            w
-w          2  w
-w2 .1g3       w
-w  3    .  +  w
-wwwwwwwwwwwwwww
+Dimensions: [00]
+Age: 51
+Constraints: 0.014084507042253521
+Fitness: 0.520003261833462
+Level: 
+wwwwwwwwww
+w3 3 +   w
+w3.  1  Aw
+w      w w
+w        w
+w    w  ww
+w        w
+w   1  2 w
+w      1 w
+wwwwwwwwww
 
-[1001]
-wwwwwwwwwwwwwww
-w+      2   1 w
-ww  2         w
-w   A g+      w
-w   3         w
-w.          w w
-w    +     2  w
-w  .1g3       w
-w    .        w
-wwwwwwwwwwwwwww
+Dimensions: [01]
+Age: 26
+Constraints: 0.004098360655737705
+Fitness: 0.49980583180751514
+Level: 
+wwwwwwwwww
+w3 3 +   w
+w3.  1  Aw
+w      w w
+w        w
+w    g  ww
+w        w
+w   1  2 w
+w      1 w
+wwwwwwwwww
 
-[0111]
-wwwwwwwwwwwwwww
-w+      2   1 w
-ww  2    + 2  w
-w     g+  A   w
-w   3         w
-w.            w
-w     w    2  w
-w  .1g3       w
-w  3    .  +  w
-wwwwwwwwwwwwwww
 
-[1011]
-wwwwwwwwwwwwwww
-w+      2   1 w
-ww  2         w
-w   A g+      w
-w   3         w
-w.          w w
-w    +     2  w
-w  .1g3       w
-w    .        w
-wwwwwwwwwwwwwww
+Dimensions: [10]
+Age: 1
+Constraints: 0.029411764705882353
+Fitness: 0.4671609919683377
+Level: 
+wwwwwwwwww
+w 3 +  31w
+w      . w
+w+ 1     w
+w 2w    +w
+w  g     w
+w        w
+w+     A+w
+w       +w
+wwwwwwwwww
+
 

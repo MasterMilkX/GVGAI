@@ -99,7 +99,7 @@ public class TimeExperiment {
 			Chromosome[] c = map.randomChromosomes(popNum, null);
 			long miniTime1 = System.nanoTime();
 			for(int j=0;j<popNum;j++) {
-				c[j].calculateResults("agents.adrienctx.Agent", null, 0);
+				c[j].calculateResults("agents.adrienctx.Agent", null, 0,0.0,10);
 			}
 			long miniTime2 = System.nanoTime();
 			sumTime += ((miniTime2-miniTime1)/1000000.0);

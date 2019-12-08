@@ -119,6 +119,7 @@ public class ADPParentRunner {
 		int saveFreq = Integer.parseInt(parameters.get("checkpointFreq"));
 		int idealTime = Integer.parseInt(parameters.get("idealLevelTime"));
 		double compareThresh = Double.parseDouble(parameters.get("constraintsThreshold")); 
+		double randomGenPercent = Double.parseDouble(parameters.get("randomInitPerc"));
 		
 		//import the game list
 		HashMap<Integer, String[]> gameList = readGamesCSV(parameters.get("gameListCSV"));
@@ -244,7 +245,7 @@ public class ADPParentRunner {
 				
 				// 9p) otherwise generate a new batch of chromosomes
 				System.out.println("P: Generating next batch...");
-				chromosomes = map.makeNextGeneration(popSize);
+				chromosomes = map.makeNextGeneration(popSize, randomGenPercent, parameters.get("generatorFolder") + "init_ph.txt");
 				iteration += 1;
 				
 				// 10p) repeat back to (1p)

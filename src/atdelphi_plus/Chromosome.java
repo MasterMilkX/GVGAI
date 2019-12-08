@@ -1,12 +1,12 @@
 /*
- * Program by Megan "Milk" Charity
+ * Program by Megan "Milk" Charity 
  * GVGAI-compatible version of Chromosome.java from MarioAIExperiment 
  * Creates a chromosome for use with MapElites
  */
 
 package atdelphi_plus;
 
-import java.io.BufferedReader;
+import java.io.BufferedReader; 
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -39,7 +39,6 @@ public class Chromosome implements Comparable<Chromosome>{
 	//open the json file that the run just exported the interactions to
 	static private String outputInteractionJSON = "src/atdelphi_plus/generatedLevels/interactions_%.json";
 
-
 	//the default level generator saves the text output to a file - so just write it and read it back in
 	static private String placeholderLoc = "src/atdelphi_plus/generatedLevels/placeholder.txt";
 
@@ -54,7 +53,6 @@ public class Chromosome implements Comparable<Chromosome>{
 	static protected ArrayList<String[]> _rules;
 	static protected int idealTime;
 	static protected double compareThreshold;
-
 
 	/********************
 	 * OBJECT VARIABLES *
@@ -199,7 +197,7 @@ public class Chromosome implements Comparable<Chromosome>{
 
 
 	//chromosome level runner
-	public void calculateResults(String aiAgent, String outFile, int id) throws IOException {
+	public void calculateResults(String aiAgent, String outFile, int id, double entropyProb, int nothingCt) throws IOException {
 		if(outFile == null)
 			outFile = Chromosome.placeholderLoc;
 		copyLevelToFile(outFile);
@@ -219,11 +217,22 @@ public class Chromosome implements Comparable<Chromosome>{
 		}
 		 */
 
-		this._age++;					//increment the age (the chromosome is older now that it has been run)
-		setConstraints(results); 	//set the constraints (win or lose)
-		//calculateRawFitness(results[2], this._textLevel);
-		this._fitness = calculateFitnessEntropy();		//set the fitness
-		calculateDimensions(id);							//set the dimensions
+		this._age++;	 				//increment the age (the chromosome is older now that it has been run)
+		
+		//SET THE CONSTRAINTS
+		double rawConstraints = getRunConstraints(results); 		//get the constraints (win or lose) / idealTime
+		double killConstraints = try_nothing(nothingCt, outFile);	//get the proportion of times killed doing nothing
+			System.out.println("Raw = " + rawConstraints + " | Kill = " + killConstraints);
+		this._constraints = rawConstraints*killConstraints;			//set the constraints to the run constraints * do_nothing constraints
+		
+		//SET THE FITNESS
+		double entropy = calculateFitnessEntropy();
+		double der_entropy = calculateFitnessDerivativeEntropy();
+			System.out.println("Entropy = " + entropy + " | Derivative Entropy = " + der_entropy);
+		this._fitness = (entropy*(1.0-entropyProb) + (der_entropy*entropyProb));		//set the fitness (tile entropy)
+		
+		//SET THE DIMENSIONS
+		calculateDimensions(id);						//set the dimensions (from AtDelFi rule set)
 
 	}
 
@@ -232,7 +241,7 @@ public class Chromosome implements Comparable<Chromosome>{
 	 * sets the constraints of the chromosome from the results of a run
 	 * sh-boom
 	 */
-	private void setConstraints(double[] results) {
+	private double getRunConstraints(double[] results) {
 		//just uses the win condition
 		//this._constraints = results[0];		
 
@@ -241,7 +250,7 @@ public class Chromosome implements Comparable<Chromosome>{
 
 		//constraints = (win / (timeToWin dist from ideal time)) + ((1-win) * 0.25 / (timeToSurvive dist from ideal time))
 		int idealTime = Chromosome.idealTime;
-		this._constraints = (results[0] / (Math.abs(idealTime - results[2])+1)) + (((1-results[0]) * 0.25) / (Math.abs(idealTime - results[2])+1));
+		return (results[0] / (Math.abs(idealTime - results[2])+1)) + (((1-results[0]) * 0.25) / (Math.abs(idealTime - results[2])+1));
 	}
 
 	//gets the entropy of unique tiles for the level to be used to calculate fitness
@@ -287,11 +296,142 @@ public class Chromosome implements Comparable<Chromosome>{
 		//calculate entropy (-sum(plog2(p)))
 		double entropy = 0;
 		for(int b=0;b<probs.length;b++) {
-			if(probs[b] > 0)
+			if(probs[b] > 0) {
+				//System.out.println("e: "+(-1*(probs[b] * Math.log10(probs[b]))));
 				entropy += (-1*(probs[b] * Math.log10(probs[b])));
+			}
+				
 		}
 
 		return 1.0 - entropy;
+	}
+	
+	
+	private double calculateFitnessDerivativeEntropy() {
+		//get row+column number 
+		char[] charLevel = this._textLevel.toCharArray();
+		String[] lineLevel = this._textLevel.split("\n");
+		int rowNum = lineLevel.length;
+		int colNum = lineLevel[0].length()+1;
+		
+		//setup 2d representation
+		char[][] charLevel2d;
+		//bordered level
+		if(this._hasBorder) {			
+			charLevel2d = new char[rowNum-2][colNum-3];		//inside of the tiles
+			int index=0;
+			for(int i=0;i<charLevel.length;i++) {
+				char c = charLevel[i];
+				if(c == '\n')						//ignore new line
+					continue;
+				if(i<(colNum))						//ignore top row
+					continue;
+				if(i>=(charLevel.length-(colNum)))	//ignore bottom row
+					continue;
+				if(i%colNum==0)						//ignore left wall
+					continue;			
+				if((i+2)%colNum==0)					//ignore right wall
+					continue;
+				
+				//add character to the matrix
+				charLevel2d[index/(colNum-3)][index%(colNum-3)] = c;
+				index++;
+				
+			}
+		}
+		//unbordered level
+		else {
+			charLevel2d = new char[rowNum][colNum-1];		//all tiles
+			int index=0;
+			for(int i=0;i<charLevel.length;i++) {
+				char c = charLevel[i];
+				if(c == '\n')						//ignore new line
+					continue;
+				
+				//add character to the matrix
+				charLevel2d[index/(colNum-1)][index%(colNum-1)] = c;
+				index++;
+				
+			}
+		}
+		
+		//calculate neighbor scores
+		int tileRowNum = charLevel2d.length;
+		int tileColNum = charLevel2d[0].length;
+		int[][] scoreMatrix = new int[tileRowNum][tileColNum];
+		
+		for(int i=0;i<tileRowNum;i++) {
+			for(int j=0;j<tileColNum;j++) {
+				scoreMatrix[i][j] = getDifference(charLevel2d[i][j],getNeighbors(i,j,charLevel2d));
+			}
+		}
+		
+		//count up all neighbor scores (4 directions -> 5 possible scores)
+		int[] dir = new int[5]; 
+		for(int i=0;i<5;i++) {
+			dir[i] = 0;
+		}
+		for(int i=0;i<tileRowNum;i++) {
+			for(int j=0;j<tileColNum;j++) {
+				dir[scoreMatrix[i][j]]++;
+			}
+		}
+		
+//		//DEBUG - check score matrix
+//		for(int i=0;i<tileRowNum;i++) {
+//			for(int j=0;j<tileColNum;j++) {
+//				System.out.print(scoreMatrix[i][j]);
+//			}
+//			System.out.println("");
+//		}
+		
+		//take the entropy of the 4 directions
+		int total = tileRowNum*tileColNum;
+		double entropy = 0.0;
+		for(int i=0;i<5;i++) {
+			double prob = ((double)dir[i] / (double)total);
+			//System.out.println(dir[i] + "/" + total + " = " + prob);
+			if(prob > 0)
+				entropy += -(prob*Math.log10(prob));
+		}
+		
+		//return the final derivative entropy
+		return 1.0 - entropy;
+	}
+	
+	//returns the surrounding tiles of a specific tile index in a 2d level
+	private char[] getNeighbors(int row, int col, char[][] level) {
+		ArrayList<Character> neighbors = new ArrayList<Character>();
+		
+		if(row > 0) {	//top
+			neighbors.add(level[row-1][col]);
+		}
+		if(row < level.length-1) {	//bottom
+			neighbors.add(level[row+1][col]);
+		}
+		if(col > 0) {	//left
+			neighbors.add(level[row][col-1]);
+		}
+		if(col < level[0].length-1) {
+			neighbors.add(level[row][col+1]);
+		}
+		
+		char[] neighbors2 = new char[neighbors.size()];
+		for(int i=0;i<neighbors.size();i++) {
+			neighbors2[i] = neighbors.get(i);
+		}
+		return neighbors2;
+	}
+	
+	//returns the number of differing tiles from neighboring tiles
+	private int getDifference(char tile, char[] neighbors) {
+		int d=0;
+		for(char c : neighbors) {
+			if(c != tile) {
+				d++;
+			}
+		}
+		return d;
 	}
 
 
@@ -435,6 +575,30 @@ public class Chromosome implements Comparable<Chromosome>{
 		return -1;
 	}
 
+	//tries running the doNothing() agent and returns true if it lived and false if it died
+	private double try_nothing(int testNum, String outFile) throws IOException {
+		/* just assume the outfile remains the same from when it was previously run
+		if(outFile == null)
+			outFile = Chromosome.placeholderLoc;
+		copyLevelToFile(outFile);
+		*/
+		System.out.println("Testing doNothing " + testNum + " times...");
+		
+		//test doNothing() x amount of times - return false if it dies at any time
+		int killCount = 0;
+		for(int i=0;i<testNum;i++) {
+			double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, outFile, false, "agents.doNothing.Agent", null, Chromosome._rnd.nextInt(), 0);
+			if(results[2] < Chromosome.idealTime) {
+				killCount++;
+			}
+		}
+		return (double)(testNum-killCount)/(double)testNum;
+	}
+	
+	
+	
+	
+	
 	//mutates a random tile (within the border if applicable) based on a "coin flip" (given probability between 0-1)
 	public void mutate(double coinFlip) {
 		double f = 0.0;
@@ -620,7 +784,7 @@ public class Chromosome implements Comparable<Chromosome>{
 		//double threshold = 1.0/10.0;		//within 10 ticks of ideal time
 		double threshold = Chromosome.compareThreshold;
 		
-		if (this._constraints >= threshold) {
+		if ((this._constraints >= threshold) && (o._constraints >= threshold)) {
 			return (int) Math.signum(this._fitness - o._fitness);
 		}
 		return (int) Math.signum(this._constraints - o._constraints);

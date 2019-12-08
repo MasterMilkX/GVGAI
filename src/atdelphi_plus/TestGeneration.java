@@ -1,19 +1,11 @@
 package atdelphi_plus;
 
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-
-import org.json.simple.JSONObject;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class TestGeneration{
 	
@@ -61,8 +53,8 @@ public class TestGeneration{
 	
 	static String aiRunner = "agents.adrienctx.Agent";
 	
-	static int popNum = 10;
-	static int iterations = 5;
+	static int popNum = 5;
+	static int iterations = 20;
 	
 	
 	public static void main(String[] args) throws IOException{
@@ -90,7 +82,7 @@ public class TestGeneration{
 				System.out.println("");
 				System.out.println(c._textLevel);
 				//System.out.println(String.join(" ", c._allChar));
-				c.calculateResults(aiRunner, null, 0);
+				c.calculateResults(aiRunner, null, 0, 0.75,10);
 				System.out.println("Constraints score: " + c._constraints);
 				System.out.println("Fitness score: " + c._fitness);
 				System.out.println("Dimension vector: " + Arrays.toString(c._dimensions));
@@ -105,7 +97,7 @@ public class TestGeneration{
 			map.assignChromosomes(myChromos);
 			
 			//set the new generation
-			myChromos = map.makeNextGeneration(popNum);
+			myChromos = map.makeNextGeneration(popNum, 0.2, null);
 		}
 
 		//export the MAPElites set

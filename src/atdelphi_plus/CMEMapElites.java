@@ -60,11 +60,13 @@ public class CMEMapElites {
 
 			//this dimensionality hasn't been saved to the map yet - so add it automatically
 			if(!_map.containsKey(dimen)) {
+				System.out.println("Added new cell: " + dimen);
 				_map.put(dimen, c);
 			}else {
 				Chromosome set_c = _map.get(dimen);
 				//replace the current chromosome if the new one is better
 				if(set_c.compareTo(c) < 0) {
+					System.out.println(dimen + ": replacing " + set_c._constraints + "/" + set_c._fitness + " --> " + c._constraints + "/" + c._fitness);
 					_map.replace(dimen, c);
 				}
 				//otherwise increase the current elite's age
@@ -87,11 +89,18 @@ public class CMEMapElites {
 	}
 
 	//generates the next batch of chromosomes from the elite cells and mutates them
-	public Chromosome[] makeNextGeneration(int batchSize) {
+	public Chromosome[] makeNextGeneration(int batchSize, double randomPerc, String placeholder) {
+		int randomAmt = (int)Math.round(batchSize*randomPerc);
+		int eliteAmt = batchSize-randomAmt;
+		
+		//System.out.println("Elite levels: " + eliteAmt + "/" + batchSize + " | Random levels: " + randomAmt + "/" + batchSize);
+		
+		
+		//generate the population from the elite map cells
 		Chromosome[] nextGen = new Chromosome[batchSize];
 		Chromosome[] eliteCells = getCells();
 
-		for(int b=0;b<batchSize;b++) {
+		for(int b=0;b<eliteAmt;b++) {
 			//pick a random elite chromosome
 			Chromosome randElite = eliteCells[new Random().nextInt(eliteCells.length)];
 			Chromosome mutChromo = randElite.clone();
@@ -102,6 +111,15 @@ public class CMEMapElites {
 			//add it to the next generation
 			nextGen[b] = mutChromo;
 		}
+		
+		//generate the random levels
+		if(randomAmt > 0) {
+			Chromosome[] randGen = this.randomChromosomes(randomAmt, placeholder);
+			for(int r=0;r<randomAmt;r++) {
+				nextGen[eliteAmt+r] = randGen[r];
+			}
+		}
+		
 
 		return nextGen;
 	}
