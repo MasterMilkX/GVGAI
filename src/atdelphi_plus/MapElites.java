@@ -22,26 +22,20 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class CMEMapElites {
+public class MapElites {
 	private String _gameName;
 	private double _coinFlip;
-	private double _eliteProb;
-	private int _infeasAmt;
-	private Random _rnd;
 
-	private HashMap<String, CMECell> _map = new HashMap<String, CMECell>();		//as a test use just the chromosome as the value
+	private HashMap<String, Chromosome> _map = new HashMap<String, Chromosome>();		//as a test use just the chromosome as the value
 	//private HashMap<String, CMECell> _map = new HashMap<String, CMECell>();
 
 	private ArrayList<String[]> tutInteractionDict = new ArrayList<String[]>();
 
 
 
-	public CMEMapElites(String gn, String gl, Random seed, double coinFlip, String genFolder, String tutFolder, int idealTime, double compareThresh, double ep, int ia) {
+	public MapElites(String gn, String gl, Random seed, double coinFlip, String genFolder, String tutFolder, int idealTime, double compareThresh) {
 		this._gameName = gn;
 		this._coinFlip = coinFlip;
-		this._eliteProb = ep;
-		this._infeasAmt = ia;
-		this._rnd = seed;
 
 		ParseTutorialRules(tutFolder);
 		Chromosome.SetStaticVar(seed, gn, gl, genFolder, tutInteractionDict, idealTime, compareThresh);
@@ -72,45 +66,33 @@ public class CMEMapElites {
 
 			//this dimensionality hasn't been saved to the map yet - so add it automatically
 			if(!_map.containsKey(dimen)) {
-				_map.put(dimen, new CMECell(c.getDimensions(),this._infeasAmt, this._rnd));
+				//System.out.println("Added new cell: " + dimen);
+				_map.put(dimen, c);
+			}else {
+				Chromosome set_c = _map.get(dimen);
+				
+				//replace the current chromosome if the new one is better
+				if(set_c.compareTo(c) < 0) {
+					//System.out.println(dimen + ": replacing " + set_c._constraints + "/" + set_c._fitness + " --> " + c._constraints + "/" + c._fitness);
+					_map.replace(dimen, c);
+					replaced.put(dimen,true);	//flag dimension as replaced
+				}
+				
 			}
-			
-			//update the F2IPop
-			Chromosome origElite = _map.get(dimen).getElite();
-			_map.get(dimen).setChromosome(c);
-			
-			//if the elite was overwritten, add it
-			if(origElite != _map.get(dimen).getElite())
-				replaced.put(dimen, true);
 		}
 		
 		//increment the ages of all the chromosomes that were not replaced
 		for(String d : replaced.keySet()) {
-			if(!replaced.get(d)) {
-				if(_map.get(d).getElite() != null)
-					_map.get(d).getElite().incrementAge();
-			}
-				
+			if(!replaced.get(d))
+				_map.get(d).incrementAge();
 		}
-		
 	}
 
-	//retuns the current mapping of elite chromosomes 
+	//retuns the current mapping of chromosomes
 	public Chromosome[] getCells() {
 		Chromosome[] cells = new Chromosome[_map.size()];
 		int index = 0;
-		for(Entry<String,CMECell> pair : this._map.entrySet()) {
-			cells[index] = pair.getValue().getElite();
-			index += 1;
-		}
-		return cells;
-	}
-	
-	//returns the F2IPop mapping of chromosomes
-	public CMECell[] getConstCells() {
-		CMECell[] cells = new CMECell[_map.size()];
-		int index = 0;
-		for(Entry<String,CMECell> pair : this._map.entrySet()) {
+		for(Entry<String,Chromosome> pair : this._map.entrySet()) {
 			cells[index] = pair.getValue();
 			index += 1;
 		}
@@ -127,13 +109,12 @@ public class CMEMapElites {
 		
 		//generate the population from the elite map cells
 		Chromosome[] nextGen = new Chromosome[batchSize];
-		//Chromosome[] eliteCells = getCells();
-		CMECell[] curPop = getConstCells();
+		Chromosome[] eliteCells = getCells();
 
 		for(int b=0;b<eliteAmt;b++) {
-			//pick a random chromosome (elite or infeasible)
-			Chromosome randChrom = curPop[new Random().nextInt(curPop.length)].getChromosome(this._eliteProb);
-			Chromosome mutChromo = randChrom.clone();
+			//pick a random elite chromosome
+			Chromosome randElite = eliteCells[new Random().nextInt(eliteCells.length)];
+			Chromosome mutChromo = randElite.clone();
 
 			//mutate it
 			mutChromo.mutate(this._coinFlip);
@@ -209,6 +190,132 @@ public class CMEMapElites {
 	}
 
 	
+	/*
+	 * OLD VERSION
+	 * {inputs : [], outputs : [], action : ""}
+	 * 
+	//sets the game interaction set (rules) for the dimensionality
+	private void ParseTutorialRules(String tutFolder) {
+		//assume that the rules will come from the game's specific json file
+		//as a test we will use one custom made for zelda
+		//however, for the real simulation - assume we can call a function from AtDelphi (original) 
+		//	that will provide these rules
+		//the format of the JSON file is:
+		//		{inputs (sprite2) : [], outputs (sprite1) : [], action : ""}
+
+		String gameRuleJSON = tutFolder + _gameName + "_tut.json";		//in this scenario it is in the same folder
+		try {
+			//read the file
+			BufferedReader jsonRead = new BufferedReader(new FileReader(gameRuleJSON));
+			System.out.println("game rules file: " + gameRuleJSON);
+
+			//parse each line (assuming 1 object per line)
+			String line = jsonRead.readLine();
+			while(line != null) {
+				//get the input sprite list, output sprite list, and action value
+				JSONObject obj = (JSONObject) new JSONParser().parse(line);
+				JSONArray inputs = (JSONArray)obj.get("input");
+				JSONArray outputs = (JSONArray)obj.get("output");
+				String action = obj.get("action").toString();
+
+				//add the set to the dictionary
+				for(int a=0;a<inputs.size();a++) {
+					for(int b=0;b<outputs.size();b++) {
+						String[] key = {action, inputs.get(a).toString(), outputs.get(b).toString()};
+						tutInteractionDict.add(key);
+					}
+				}
+
+				line = jsonRead.readLine();
+			}
+			//close the file
+			jsonRead.close();         
+		}
+		catch(FileNotFoundException e) {
+			System.out.println("ERROR: Unable to open file '" + gameRuleJSON + "'");    
+			System.exit(0);
+		}
+		catch(IOException e) {
+			System.out.println("IO EXCEPTION");
+			e.printStackTrace();
+		}catch (ParseException e) {
+			System.out.println("PARSE EXCEPTION");
+			e.printStackTrace();
+		}
+	}
+	*/
+	
+	
+	
+
+	//sets the game interaction set (rules) for the dimensionality
+		/*
+		 * OLD VERSION
+		 * {"condition":"","action":"","sprite2":"","sprite1":""}
+		 * 
+		 
+		private void ParseTutorialRules(String tutFolder) {
+			//assume that the rules will come from the game's specific json file
+			//as a test we will use one custom made for zelda
+			//however, for the real simulation - assume we can call a function from AtDelphi (original) 
+			//	that will provide these rules
+			//the format of the JSON file is:
+			//		{"condition":"n\/a","action":"KillSprite","sprite2":"monsterQuick","sprite1":"nokey"},
+			
+			String gameRuleJSON = tutFolder + _gameName + "_tut.json";	
+			try {
+		        //read the file
+				String contents = new String(Files.readAllBytes(Paths.get(gameRuleJSON)));
+				
+				//clean up the set
+				
+				//assume the input was surrounded by [ and ]
+				contents = contents.substring(1, contents.length()-1);
+				contents.trim();
+				//System.out.println(contents);
+				
+				//clean up syntax
+				contents = contents.replace("},", "}\n");
+				contents = contents.replace("\n\n", "\n");			//in case there already was \n
+				//contents = contents.replace("n\\/a", "Collision");	//mike said he would fix?
+			
+				String[] actions = contents.split("\n");
+				for(String line : actions) {
+					line.trim();
+					JSONObject obj = (JSONObject) new JSONParser().parse(line);
+					Object condition = obj.get("condition");
+					Object action = obj.get("action");
+					Object sprite2 = obj.get("sprite2");
+					Object sprite1 = obj.get("sprite1");
+					
+					
+					//look for condition, action, sprite2, and sprite1
+					String[] key = {(action != null ? action.toString() : ""), 
+							(sprite2 != null ? sprite2.toString() : ""),
+							(sprite1 != null ? sprite1.toString() : ""), 
+							(condition != null ? condition.toString() : "")};
+					tutInteractionDict.add(key);
+					//System.out.println(Arrays.deepToString(key));
+				}
+				
+		    }
+		    catch(FileNotFoundException e) {
+		        System.out.println("ERROR: Unable to open file '" + gameRuleJSON + "'");    
+		        System.exit(0);
+		    }
+		    catch(IOException e) {
+		    	System.out.println("IO EXCEPTION");
+		        e.printStackTrace();
+		    }
+			catch (ParseException e) {
+		    	System.out.println("PARSE EXCEPTION");
+				e.printStackTrace();
+			}
+			
+		}
+	*/
+	
+	
 	private void ParseTutorialRules(String tutFolder) {
 		//assume that the rules will come from the game's specific json file
 		//as a test we will use one custom made for zelda
@@ -279,28 +386,15 @@ public class CMEMapElites {
 		//print the map to the file
 		Set<String> keys = this._map.keySet();
 		for(String k : keys) {
-			CMECell cell = this._map.get(k);
-			Chromosome l = cell.getElite();
+			Chromosome l = this._map.get(k);
 
-			//show elite stats
 			str += ("Dimensions: [" + k + "]\n");
-			str += ("Elite:\n");
-			if(l != null) {
-				//show elite level
-				str += (l.toString());
-				str += ("\n" + l.get_age() + ", " + l.getConstraints() + "," + l.getFitness() + "\n");
-			}
-			str += ("\n\n");
-				
-			
-			//show infeasible levels
-			str += ("\nInfeasible Levels (" + cell.getPopLen() + "):");
-			Chromosome[] infeasLevels = cell.getInfeasible(true);
-			for(Chromosome c : infeasLevels) {
-				str += ("\n" + c.toString());
-				str += ("\n"+c.getConstraints() + ", " + c.getFitness() + "\n");
-			}
-			
+			str += ("Age: " + l.get_age());
+			str += ("\nConstraints: " + l.getConstraints());
+			str += ("\nFitness: " + l.getFitness());
+			str += "\nLevel: \n";
+			str += (l.toString());
+
 			str += "\n\n";
 		} 
 
@@ -317,30 +411,16 @@ public class CMEMapElites {
 			String wholePath = exportPath + "/" + this._gameName + "_" + k + ".txt";
 			BufferedWriter bw = new BufferedWriter(new FileWriter(wholePath));
 
+			Chromosome l = this._map.get(k);
 			String str = "";
-			
-			CMECell cell = this._map.get(k);
-			Chromosome l = cell.getElite();
 
-			//show elite stats
 			str += ("Dimensions: [" + k + "]\n");
-			str += ("Elite:\n");
-			if(l != null) {
-				//show elite level
-				str += (l.toString());
-				str += ("\n" + l.get_age() + ", " + l.getConstraints() + "," + l.getFitness() + "\n");
-			}
-			str += ("\n\n");
-				
-			
-			//show infeasible levels
-			str += ("\nInfeasible Levels (" + cell.getPopLen() + "):");
-			Chromosome[] infeasLevels = cell.getInfeasible(true);
-			for(Chromosome c : infeasLevels) {
-				str += ("\n" + c.toString());
-				str += ("\n"+c.getConstraints() + ", " + c.getFitness() + "\n");
-			}
-			
+			str += ("Age: " + l.get_age());
+			str += ("\nConstraints: " + l.getConstraints());
+			str += ("\nFitness: " + l.getFitness());
+			str += "\nLevel: \n";
+			str += (l.toString());
+
 			str += "\n\n";
 
 
@@ -358,43 +438,22 @@ public class CMEMapElites {
 		//individually writes every level dimension, age, constraints, fitness, and text level
 		for(String k : keys) {
 			String wholePath = checkPtPath + this._gameName + "_" + k + ".txt";
-			Chromosome l = this._map.get(k).getElite();
+			BufferedWriter bw = new BufferedWriter(new FileWriter(wholePath));
+
+			Chromosome l = this._map.get(k);
 			String str = "";
 
-			
-			BufferedWriter bw = new BufferedWriter(new FileWriter(wholePath));
-			//export the elite of the cell
-			if(l != null) {
-				
-				//metadata section
-				str += l.get_age() + "\n";					//age
-				str += (l._hasBorder ? "1" : "0")+ "\n";	//border
-				str += l.getConstraints() + "\n";			//constraints
-				str += l.getFitness()+"\n";						//fitnesss
-				str += l.getDimensionsStr();		//dimension
+			//metadata section
+			str += l.get_age() + "\n";					//age
+			str += (l._hasBorder ? "1" : "0")+ "\n";	//border
+			str += l.getConstraints() + "\n";			//constraints
+			str += l.getFitness()+"\n";						//fitnesss
+			str += l.getDimensionsStr();		//dimension
 
-				//text level section
-				str += "\n\n";
-				str += l.toString();
+			//text level section
+			str += "\n\n";
+			str += l.toString();
 
-				
-			}
-			//export the best infeasible level instead
-			else {
-				Chromosome i = this._map.get(k).getInfeasible(true)[0];
-				
-				//metadata section
-				str += i.get_age() + "\n";					//age
-				str += (i._hasBorder ? "1" : "0")+ "\n";	//border
-				str += i.getConstraints() + "\n";			//constraints
-				str += i.getFitness()+"\n";						//fitnesss
-				str += i.getDimensionsStr();		//dimension
-
-				//text level section
-				str += "\n\n";
-				str += i.toString();
-			}
-			
 			bw.write(str);
 			bw.close();
 		}
@@ -433,8 +492,7 @@ public class CMEMapElites {
 				
 			
 			//get the dimension (assuming the map is empty upon initialization)
-			_map.put(c.getDimensionsStr(), new CMECell(c.getDimensions(), this._infeasAmt, this._rnd));
-			_map.get(c.getDimensionsStr()).setChromosome(c);
+			_map.put(c.getDimensionsStr(), c);
 		}
 	}
 

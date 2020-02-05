@@ -18,11 +18,11 @@ import atdelphi_plus.evaluator.ParentEvaluator;
 
 public class ADPParentRunner {
 
-	private static void updateEliteCountFile(String fileLoc, int gen, int ct, double avg_fit){
+	private static void updateEliteCountFile(String fileLoc, int gen, int ct, String fitsArr){
 		File statFile = new File(fileLoc);
 		try {
 			FileWriter fw = new FileWriter(statFile, true);
-			fw.write(gen +","+ct+","+avg_fit+"\n");
+			fw.write(gen +","+ct+","+fitsArr+"\n");
 			fw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -84,7 +84,7 @@ public class ADPParentRunner {
 	}
 	
 	//export the map to a file
-	public static void simpleExportMap(CMEMapElites m, String outFile) throws Exception{
+	public static void simpleExportMap(MapElites m, String outFile) throws Exception{
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outFile));
 		bw.write(m.toString());
 		bw.close();
@@ -120,6 +120,8 @@ public class ADPParentRunner {
 		int idealTime = Integer.parseInt(parameters.get("idealLevelTime"));
 		double compareThresh = Double.parseDouble(parameters.get("constraintsThreshold")); 
 		double randomGenPercent = Double.parseDouble(parameters.get("randomInitPerc"));
+		double eliteProb = Double.parseDouble(parameters.get("eliteProb"));
+		int infeasibleCt = Integer.parseInt(parameters.get("infeasibleCt"));
 		
 		//import the game list
 		HashMap<Integer, String[]> gameList = readGamesCSV(parameters.get("gameListCSV"));
@@ -142,7 +144,11 @@ public class ADPParentRunner {
 		String gameLoc = gameList.get(gameIndex)[1];
 		
 		//setup map elites and the first chromosomes
-		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"), idealTime, compareThresh);
+		//MapElites map = new MapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"), idealTime, compareThresh);
+		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"), idealTime, compareThresh, eliteProb, infeasibleCt);
+		
+		System.out.println(String.join(" ", Chromosome._allChar));
+		
 		ParentEvaluator parent = new ParentEvaluator(parameters.get("inputFolder"), parameters.get("outputFolder"));
 		System.out.println("First Batch of Chromosomes");
 		Chromosome[] chromosomes = map.randomChromosomes(popSize, parameters.get("generatorFolder") + "init_ph.txt");
@@ -164,9 +170,10 @@ public class ADPParentRunner {
 		
 		String statFile = parameters.get("resultFolder") + "map_stats.txt";	//statfile
 		
-		//if there is a starting iteration, import the map from that point
+		//if there is a starting iteration, import the map from that point and set the chromosomes to the elites
 		if(iteration > 0) {
 			map.checkpointImport(parameters.get("checkpointFolder"), iteration);
+			//chromosomes = map.makeNextGeneration(popSize, randomGenPercent, parameters.get("generatorFolder") + "init_ph.txt");
 		}
 		//otherwise, delete old stats file
 		else {
@@ -236,7 +243,17 @@ public class ADPParentRunner {
 				}
 				
 				// 8.2p) write the stats of the mapelites out
-				updateEliteCountFile(statFile, iteration, map.getCells().length,map.getMapAvgFitness());
+					//compile the elite's fitnesses in one string
+				String fitsArr = "";
+				Chromosome[] el = map.getCells();
+				for(int i=0;i<el.length;i++) {
+					if(el[i] != null)
+						fitsArr+=(el[i].getDimensionsStr()+"->"+el[i].getFitness()+",");
+				}
+				if(fitsArr.lastIndexOf(",") > -1)
+					fitsArr.substring(0,fitsArr.lastIndexOf(","));
+				
+				updateEliteCountFile(statFile, iteration, el.length,fitsArr);
 				
 				//if completed all iterations, then finish
 				if(maxIterations > 0 && iteration >= maxIterations) {

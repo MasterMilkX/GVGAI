@@ -1,54 +1,286 @@
 GAME: zelda
-TOTAL CELLS: 3
+TOTAL CELLS: 2
 
 
-Dimensions: [00]
-Age: 51
-Constraints: 0.014084507042253521
-Fitness: 0.520003261833462
-Level: 
-wwwwwwwwww
-w3 3 +   w
-w3.  1  Aw
-w      w w
-w        w
-w    w  ww
-w        w
-w   1  2 w
-w      1 w
-wwwwwwwwww
-
-Dimensions: [01]
-Age: 26
-Constraints: 0.004098360655737705
-Fitness: 0.49980583180751514
-Level: 
-wwwwwwwwww
-w3 3 +   w
-w3.  1  Aw
-w      w w
-w        w
-w    g  ww
-w        w
-w   1  2 w
-w      1 w
-wwwwwwwwww
+Dimensions: [0100]
+Elite:
 
 
-Dimensions: [10]
-Age: 1
-Constraints: 0.029411764705882353
-Fitness: 0.4671609919683377
-Level: 
-wwwwwwwwww
-w 3 +  31w
-w      . w
-w+ 1     w
-w 2w    +w
-w  g     w
-w        w
-w+     A+w
-w       +w
-wwwwwwwwww
+
+Infeasible Levels (3):
+wwwwwwwwwwwwwww
+w         1 A w
+w       g     w
+w 3     w     w
+w             w
+w   +g        w
+w +      3    w
+w g        .3 w
+w3      2 w   w
+wwwwwwwwwwwwwww0.003968253968253968, 0.47917110690394615
+
+wwwwwwwwwwwwwww
+w         1 A w
+w       g     w
+w 3     w     w
+w             w
+w   +g        w
+w +      3    w
+w g  1     .3 w
+w3      2 w   w
+wwwwwwwwwwwwwww0.003968253968253968, 0.4639167414035611
+
+wwwwwwwwwwwwwww
+w        w    w
+w      g      w
+w2            w
+w   +         w
+w  12         w
+w        3    w
+w2            w
+w 1 A w   .  +w
+wwwwwwwwwwwwwww
+0.0015873015873015873, 0.5083535899926368
+
+
+Dimensions: [1000]
+Elite:
+wwwwwwwwwwwwwww
+w         1 w w
+w       g     w
+w 3     w     w
+w             w
+w    g        w
+w +           w
+w A        .3 w
+w3      2 w   w
+wwwwwwwwwwwwwww
+
+19, 0.16666666666666666,0.5078553063684108
+
+
+
+Infeasible Levels (20):
+wwwwwwwwwwwwwww
+w     A       w
+w       g     w
+w+       2    w
+w        1 .  w
+w .   3       w
+w     w       w
+w            1w
+w     .       w
+wwwwwwwwwwwwwww
+0.09090909090909091, 0.5376705692132313
+
+wwwwwwwwwwwwwww
+w         w   w
+w  g 31       w
+w       A   1 w
+w      +      w
+w  .       w  w
+w             w
+w    3 2g     w
+w         +   w
+wwwwwwwwwwwwwww0.09090909090909091, 0.5133341164846787
+
+wwwwwwwwwwwwwww
+w         w   w
+w    31     g w
+w          2g w
+w      +      w
+w  .       w  w
+w     A       w
+w    3 2g     w
+w         3   w
+wwwwwwwwwwwwwww0.09090909090909091, 0.4936363368132417
+
+wwwwwwwwwwwwwww
+w         1 w w
+w       g    ww
+w 3     w     w
+w             w
+w    g        w
+w +           w
+w A        .3 w
+w3      2 w   w
+wwwwwwwwwwwwwww0.09090909090909091, 0.48953815683796487
+
+wwwwwwwwwwwwwww
+w         1 w w
+w       g     w
+w 3     w     w
+w             w
+w    g        w
+w +           w
+w A        .3 w
+w3   + 12 w   w
+wwwwwwwwwwwwwww0.07142857142857142, 0.4767337374325882
+
+wwwwwwwwwwwwwww
+w         1 w w
+w       g     w
+w 3     w    1w
+w        g    w
+w    g        w
+w +           w
+w A        .3 w
+w3      2 w   w
+wwwwwwwwwwwwwww0.07142857142857142, 0.47125504278341906
+
+wwwwwwwwwwwwwww
+w         1 w w
+w       g     w
+w 3   1 w     w
+w   1         w
+w    g        w
+w +         A w
+w    g     .3 w
+w3 2    2 w   w
+wwwwwwwwwwwwwww0.06666666666666667, 0.4424355547186276
+
+wwwwwwwwwwwwwww
+w         w   w
+w  g 31       w
+w           1 w
+w      +      w
+w  .       w  w
+w     A       w
+w    3 2g     w
+w         +   w
+wwwwwwwwwwwwwww0.06666666666666667, 0.5131394553269045
+
+wwwwwwwwwwwwwww
+w         1 w w
+w       g     w
+w 3     w     w
+w             w
+w    g        w
+w +           w
+w A        .3 w
+w3      2 w   w
+wwwwwwwwwwwwwww0.06666666666666667, 0.5078553063684108
+
+wwwwwwwwwwwwwww
+w .       A w w
+w      +g    ww
+w 3w    w     w
+w             w
+w    g        w
+w +           w
+w          .3 w
+w3      1 w   w
+wwwwwwwwwwwwwww0.06666666666666667, 0.46578079127357064
+
+wwwwwwwwwwwwwww
+w         w   w
+wg   3.       w
+w           1 w
+w      +      w
+w  .       w  w
+w +3 +A       w
+w    . 2g    3w
+w             w
+wwwwwwwwwwwwwww0.0625, 0.4867870290568614
+
+wwwwwwwwwwwwwww
+w         w   w
+w    3.       w
+w           1 w
+w      +      w
+w  .       w  w
+w +3 +A       w
+w    . 2g     w
+w             w
+wwwwwwwwwwwwwww0.058823529411764705, 0.5147169086488392
+
+wwwwwwwwwwwwwww
+w         1 w w
+w    2  g     w
+w 3     w     w
+w             w
+w    g        w
+w +           w
+w A        .3 w
+w3      2 w   w
+wwwwwwwwwwwwwww0.05555555555555555, 0.49156958980641086
+
+wwwwwwwwwwwwwww
+w         1 w w
+w       g     w
+w 3     w     w
+w3            w
+w    g        w
+w +       .   w
+w A        .3 w
+w3      2 w   w
+wwwwwwwwwwwwwww0.045454545454545456, 0.4696688586206466
+
+wwwwwwwwwwwwwww
+w         w   w
+w    3.       w
+w           1 w
+w    . +      w
+w  1       w  w
+w +3 +A       w
+w    . 2g     w
+w             w
+wwwwwwwwwwwwwww0.044444444444444446, 0.4873173904078105
+
+wwwwwwwwwwwwwww
+w         w   w
+w    31       w
+w           1 w
+w      +      w
+w  .       w  w
+w     A       w
+w    3 2g     w
+w             w
+wwwwwwwwwwwwwww
+0.043478260869565216, 0.550552118671983
+
+wwwwwwwwwwwwwww
+w         w   w
+w    3.       w
+w           1 w
+w      +  3   w
+w  .       w  w
+w +3 +A       w
+w    . 2g     w
+w             w
+wwwwwwwwwwwwwww0.041666666666666664, 0.4920413278598086
+
+wwwwwwwwwwwwwww
+w         1 w w
+w       g     w
+w 3     w     w
+w             w
+w    g        w
+w +.          w
+w A        .3 w
+w3      2 w   w
+wwwwwwwwwwwwwww0.04, 0.4926688679820462
+
+wwwwwwwwwwwwwww
+w         1 w w
+w       A     w
+w 3     w     w
+w           w w
+w    g        w
+w +  g     +  w
+w          .3 w
+w3  3   2 w   w
+wwwwwwwwwwwwwww0.038461538461538464, 0.47339405376916766
+
+wwwwwwwwwwwwwww
+w      A  w   w
+w    3.       w
+w           1 w
+w      +      w
+w  .       w  w
+w +3 ++      +w
+w  g . 2g     w
+w             w
+wwwwwwwwwwwwwww0.038461538461538464, 0.45087698736505216
 
 

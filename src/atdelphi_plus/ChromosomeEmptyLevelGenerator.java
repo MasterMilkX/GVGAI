@@ -18,7 +18,7 @@ import core.generator.AbstractLevelGenerator;
 import tools.ElapsedCpuTimer;
 import tools.GameAnalyzer;
 
-public class ChromosomeLevelGenerator extends AbstractLevelGenerator {
+public class ChromosomeEmptyLevelGenerator extends AbstractLevelGenerator {
 
 	/**
 	 * Add Borders to the generated random level
@@ -50,9 +50,9 @@ public class ChromosomeLevelGenerator extends AbstractLevelGenerator {
 	 * @param game			Abstract game description object. This object contains all needed information about the current game.
 	 * @param elapsedTimer	Timer to define the maximum amount of time for the constructor.
 	 */
-	public ChromosomeLevelGenerator(GameDescription game, ElapsedCpuTimer elapsedTimer){
+	public ChromosomeEmptyLevelGenerator(GameDescription game, ElapsedCpuTimer elapsedTimer){
 		random = new Random();
-		emptyPercentage = 0.95;
+		emptyPercentage = 0.9;
 	}
 	
 	
@@ -198,10 +198,12 @@ public class ChromosomeLevelGenerator extends AbstractLevelGenerator {
 			includeBorders = buildLayout(game, dataPoints, width, length);
 		}
 		
-		//Add only one of all objects in the choices array
-		for(Character c:choices){
-			addUnique(dataPoints, width, length, c);
-		}
+		
+//		//Add only one of all objects in the choices array
+//		for(Character c:choices){
+//			addUnique(dataPoints, width, length, c);
+//		}
+		
 		
 		//if no avatar is defined in the level mapping section use 'A' to add it
 		if(avatar.size() == 0){
@@ -214,23 +216,21 @@ public class ChromosomeLevelGenerator extends AbstractLevelGenerator {
 			for(int x=0; x < width; x++){
 				//check if the position (x, y) is defined in the list of points
 				DataPoint p = isUnique(dataPoints, x, y);
-				
-				//add empty space
-				double randEmpty = random.nextDouble();
-				//System.out.println(randEmpty);
-				
 				//if yes then add the result
 				if(p != null){
 					result += p.c;
 
 				}
-				else if(randEmpty < emptyPercentage){
+				//add empty space
+				else{
 					result += " ";
 				}
+				/*
 				//add random object
 				else{
 					result += choices.get(random.nextInt(choices.size()));
 				}
+				*/
 			}
 			result += "\n";
 		}

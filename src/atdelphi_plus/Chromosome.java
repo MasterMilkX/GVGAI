@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import org.json.simple.JSONArray;
@@ -34,7 +36,9 @@ public class Chromosome implements Comparable<Chromosome>{
 
 	//custom level generator directly based off randomLevelGenerator.java 
 	//  differences is the constant size of the level
-	static private String chromoLevelGenerator = "atdelphi_plus.ChromosomeLevelGenerator";
+	static private String chromoLevelGenerator = "atdelphi_plus.ChromosomeLevelGenerator";				//RANDOM (NOISY) LEVEL GENERATOR
+	//static private String chromoLevelGenerator = "atdelphi_plus.ChromosomeEmptyLevelGenerator";				//EMPTY LEVEL GENERATOR
+
 
 	//open the json file that the run just exported the interactions to
 	static private String outputInteractionJSON = "src/atdelphi_plus/generatedLevels/interactions_%.json";
@@ -104,6 +108,9 @@ public class Chromosome implements Comparable<Chromosome>{
 
 		this._textLevel = level;
 		this._hasBorder = hasborder;
+		
+		//fix any bad characters
+		this.fixMapChar();
 	}
 
 
@@ -156,7 +163,7 @@ public class Chromosome implements Comparable<Chromosome>{
 			if(line.equals("LevelMapping")) {
 				mode = 1;
 				continue;
-			}else if(line.contentEquals("InteractionSet")) {
+			}else if(!line.contains(" > ")) {
 				mode = 0;
 				continue;
 			}
@@ -169,6 +176,21 @@ public class Chromosome implements Comparable<Chromosome>{
 		return charList.split("");
 	}
 
+	//fixes the characters that aren't actually in the level and replaces them with real random characters
+	private void fixMapChar() {
+		char[] charLevel = this._textLevel.toCharArray();
+		List<String> allChar = Arrays.asList(Chromosome._allChar);
+		for(int i=0;i<charLevel.length;i++) {
+			if((charLevel[i] != ' ') && (charLevel[i] != '\n') && (!allChar.contains(Character.toString(charLevel[i])))) {
+				System.out.print("Bad character: " + charLevel[i]);
+				charLevel[i] = Chromosome._allChar[Chromosome._rnd.nextInt(Chromosome._allChar.length)].charAt(0);
+				System.out.println(" --> " + charLevel[i]);
+			}
+		}
+		
+		this._textLevel = new String(charLevel);
+	}
+	
 	/* 
 	 * check if the level has a border
 	 */
@@ -177,6 +199,10 @@ public class Chromosome implements Comparable<Chromosome>{
 
 		//if there is a border, the first character in the level should be the start of the border
 		String bordChar = Character.toString(lines[0].charAt(0));		
+		
+		//an empty space does not make a border
+		if(bordChar.equals(" "))
+			return false;
 
 		//check first and last line for border character (ceiling and floor)
 		if(lines[0].replace(bordChar, "").length() > 0)		//if there are any characters leftover, it is not a border
@@ -216,8 +242,12 @@ public class Chromosome implements Comparable<Chromosome>{
 			System.out.println(d);
 		}
 		 */
-
-		this._age++;	 				//increment the age (the chromosome is older now that it has been run)
+		
+		//increment the age (the chromosome is older now that it has been run)
+		if(this._age == 0)
+			this._age=1;
+		
+		//this._age++;	 				
 		
 		//SET THE CONSTRAINTS
 		double rawConstraints = getRunConstraints(results); 		//get the constraints (win or lose) / idealTime
@@ -502,7 +532,7 @@ public class Chromosome implements Comparable<Chromosome>{
 			//iterate through the array items (if they exist)
 			for(int i=0;i<arr.size();i++) {
 				JSONObject obj = (JSONObject)arr.get(i);
-				String action = obj.get("action").toString();
+				//String action = obj.get("action").toString();
 				String sprite1 = obj.get("sprite1").toString();
 
 				//String[] tryKey = {action, "", sprite1, "Player Input"};
@@ -559,13 +589,15 @@ public class Chromosome implements Comparable<Chromosome>{
 		for(int r=0;r<_rules.size();r++) {
 			String[] rule = _rules.get(r);
 
+			//System.out.println(String.join("-", rule) + " | " + String.join("-", interaction));
+			
 			//if not even the same length then skip
 			if(rule.length != interaction.length)
 				continue;
 
 			boolean matchRule = true;
 			for(int i=0;i<interaction.length;i++) {
-				if(!rule[i].equals(interaction[i]))	//if a mismatch - then definitely not the same rule
+				if(!rule[i].equals("*") && !rule[i].equals(interaction[i]))	//if a mismatch - then definitely not the same rule
 					matchRule = false;
 			}
 
@@ -588,11 +620,13 @@ public class Chromosome implements Comparable<Chromosome>{
 		int killCount = 0;
 		for(int i=0;i<testNum;i++) {
 			double[] results = ArcadeMachine.runOneGame(Chromosome._gamePath, outFile, false, "agents.doNothing.Agent", null, Chromosome._rnd.nextInt(), 0);
-			if(results[2] < Chromosome.idealTime) {
+			if(results[2] < (Chromosome.idealTime-10)) {
 				killCount++;
 			}
 		}
-		return (double)(testNum-killCount)/(double)testNum;
+		double ratio = (double)(testNum-killCount)/(double)testNum;
+		
+		return (ratio > 0.5 ? 1.0 : ratio);
 	}
 	
 	
@@ -706,6 +740,9 @@ public class Chromosome implements Comparable<Chromosome>{
 	public void rewriteFromCheckpoint(String chromoMeta, String chromoLevel) {
 		this.saveResults(chromoMeta);
 		this._textLevel = chromoLevel;
+
+		//fix any bad characters
+		this.fixMapChar();
 	}
 
 
@@ -805,6 +842,14 @@ public class Chromosome implements Comparable<Chromosome>{
 
 	public int[] getDimensions() {
 		return this._dimensions;
+	}
+	
+	public String getDimensionsStr() {
+		String s = "";
+		for(int i=0;i<this._dimensions.length;i++) {
+			s += this._dimensions[i];
+		}
+		return s;
 	}
 
 	///////////  SETTER FUNCTIONS  //////////

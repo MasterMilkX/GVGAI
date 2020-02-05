@@ -65,7 +65,7 @@ public class TimeExperiment {
 		*/
 		
 		//initialize mapelites
-		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, 0.5, "src/atdelphi_plus/generatedLevels/", "src/atdelphi_plus/", 70, 1.0/10.0);
+		MapElites map = new MapElites(gameName, gameLoc, seed, 0.5, "src/atdelphi_plus/generatedLevels/", "src/atdelphi_plus/", 70, 1.0/10.0);
 				
 		double sumTime = 0;
 		

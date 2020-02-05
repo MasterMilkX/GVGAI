@@ -1,9 +1,2 @@
-[{"action":"ACTION_USE","tick":"14","sprite1":"nokey"},
-{"action":"ACTION_USE","tick":"27","sprite1":"nokey"},
-{"action":"ACTION_USE","tick":"33","sprite1":"nokey"},
-{"action":"ACTION_USE","tick":"34","sprite1":"nokey"},
-{"action":"ACTION_USE","tick":"41","sprite1":"nokey"},
-{"action":"ACTION_USE","tick":"48","sprite1":"nokey"},
-{"action":"ACTION_USE","tick":"62","sprite1":"nokey"},
-{"action":"ACTION_USE","tick":"101","sprite1":"withkey"},
-{"action":"ACTION_USE","tick":"115","sprite1":"withkey"}]
+[{"action":"ACTION_USE","tick":"19","sprite1":"withkey"},
+{"action":"ACTION_USE","tick":"29","sprite1":"withkey"}]

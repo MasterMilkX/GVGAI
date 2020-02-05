@@ -47,6 +47,7 @@ public class TestGeneration{
 	// Other settings - these will become parameters in a seperate file
 	static Random seed = new Random();			//randomization seed to start from
 	static int gameIdx = 90;							//index of the game to use	[ZELDA]
+	//static int gameIdx = 76;							//index of the game to use	[SOLARFOX]
 	static String gameName = games[gameIdx];
 	//String recordLevelFile = generateLevelPath + games[gameIdx] + "_glvl.txt";
 	static String gameLoc = gamesPath + games[gameIdx] + ".txt";
@@ -61,8 +62,12 @@ public class TestGeneration{
 		long startTime = System.nanoTime();
 		
 		//initialize mapelites
-		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, 0.5, "src/atdelphi_plus/generatedLevels/", "src/atdelphi_plus/", 70, 1.0/10.0);
+		//MapElites map = new MapElites(gameName, gameLoc, seed, 0.5, "src/atdelphi_plus/generatedLevels/", "src/atdelphi_plus/", 70, 1.0/10.0);
+		CMEMapElites map = new CMEMapElites(gameName, gameLoc, seed, 0.75, "src/atdelphi_plus/generatedLevels/", "src/atdelphi_plus/", 70, 1.0/10.0, 0.5, 20);
+
+		map.printRules();
 		
+		System.out.println(String.join(" ", Chromosome._allChar));
 		
 		//initialize the 10 random chromosomes
 		long miniTime1 = System.nanoTime();
@@ -82,7 +87,7 @@ public class TestGeneration{
 				System.out.println("");
 				System.out.println(c._textLevel);
 				//System.out.println(String.join(" ", c._allChar));
-				c.calculateResults(aiRunner, null, 0, 0.75,10);
+				c.calculateResults(aiRunner, null, 0, 0.75,5);
 				System.out.println("Constraints score: " + c._constraints);
 				System.out.println("Fitness score: " + c._fitness);
 				System.out.println("Dimension vector: " + Arrays.toString(c._dimensions));
@@ -91,7 +96,6 @@ public class TestGeneration{
 			
 			//print the stats of the generation
 			map.printGenStats(g, myChromos);
-			
 			
 			//assign the chromosomes to the map elite hash table if their fitness scores are better
 			map.assignChromosomes(myChromos);
@@ -102,7 +106,7 @@ public class TestGeneration{
 
 		//export the MAPElites set
 		System.out.println("Exporting map!");
-		BufferedWriter bw = new BufferedWriter(new FileWriter("src/atdelphi_plus/generatedLevels/mapelites.txt"));
+		BufferedWriter bw = new BufferedWriter(new FileWriter("/Users/milk/Desktop/mapelites.txt"));
 		bw.write(map.toString());
 		bw.close();
 		

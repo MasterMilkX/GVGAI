@@ -14,71 +14,78 @@ public class CMECell {
     private Random _rnd;
     
     public CMECell(int[] dimensions, int size, Random rnd) {
-	this._dimensions = dimensions;
-	this._size = size;
-	this._pop = new ArrayList<Chromosome>();
-	this._elite = null;
-	this._rnd = rnd;
+		this._dimensions = dimensions;
+		this._size = size;
+		this._pop = new ArrayList<Chromosome>();
+		this._elite = null;
+		this._rnd = rnd;
     }
     
     public int[] getDimensions(){
-	return this._dimensions;
+    	return this._dimensions;
     }
     
     public Chromosome getElite() {
-	return this._elite;
+    	return this._elite;
+    }
+    
+    public int getPopLen() {
+    	return this._pop.size();
     }
     
     public Chromosome[] getInfeasible(boolean descending) {
-	Collections.sort(this._pop);
-	if(descending) {
-	    Collections.reverse(this._pop);
-	}
-	return this._pop.toArray(new Chromosome[0]);
+		Collections.sort(this._pop);
+		if(descending) {
+		    Collections.reverse(this._pop);
+		}
+		return this._pop.toArray(new Chromosome[0]);
     }
     
+    //rank the population of chromosomes (in descending order)
     private Chromosome rankSelection(Chromosome[] pop) {
-	double[] ranks = new double[pop.length];
-	ranks[0] = 1;
-	for(int i=1; i<pop.length; i++) {
-	    ranks[i] = ranks[i-1] + i + 1;
-	}
-	for(int i=0; i<pop.length; i++) {
-	    ranks[i] /= ranks[ranks.length - 1];
-	}
-	double randValue = this._rnd.nextDouble();
-	for(int i=0; i<ranks.length; i++){
-	    if(randValue <= ranks[i]) {
-		return pop[i];
-	    }
-	}
-	return pop[pop.length - 1];
+		double[] ranks = new double[pop.length];
+		ranks[0] = 1;
+		for(int i=1; i<pop.length; i++) {
+		    ranks[i] = ranks[i-1] + i + 1;
+		}
+		for(int i=0; i<pop.length; i++) {
+		    ranks[i] /= ranks[ranks.length - 1];
+		}
+		double randValue = this._rnd.nextDouble();
+		for(int i=0; i<ranks.length; i++){
+		    if(randValue <= ranks[i]) {
+		    	return pop[i];
+		    }
+		}
+		return pop[pop.length - 1];
     }
     
+    //return the a random chromosome (elite or infeasible)
     public Chromosome getChromosome(double eliteProb) {
-	Chromosome elite = this.getElite();
-	Chromosome[] infeasible = this.getInfeasible(false);
-	if(infeasible.length == 0 || (elite != null && this._rnd.nextDouble() < eliteProb)) {
-	    return elite;
-	}
-	return this.rankSelection(infeasible);
+		Chromosome elite = this.getElite();
+		Chromosome[] infeasible = this.getInfeasible(false);
+		if(infeasible.length == 0 || (elite != null && this._rnd.nextDouble() < eliteProb)) {
+		    return elite;
+		}
+		return this.rankSelection(infeasible);
     }
     
+    //add the chromosome to the cell list (replace elite if better than current)
     public void setChromosome(Chromosome c) {
-	if(c.getConstraints() == 1) {
-		//if no elite set, or the chromosome c beats the current elite
-	    if(this._elite == null || c.getFitness() > this._elite.getFitness()) {
-		this._elite = c;
-	    }
-	    return;
-	}
-	//remove the first bad chromosome
-	if(this._pop.size() >= this._size) {
-	    Chromosome[] chromosomes = this.getInfeasible(false);
-	    this._pop.remove(chromosomes[0]);
-	}
-
-	//add the new chromosome
-	this._pop.add(c);
+		if(c.getConstraints() >= Chromosome.compareThreshold) {
+			//if no elite set, or the chromosome c beats the current elite
+		    if(this._elite == null || c.getFitness() > this._elite.getFitness()) {
+		    	this._elite = c;
+		    }
+		    return;
+		}
+		//remove the first bad chromosome
+		if(this._pop.size() >= this._size) {
+		    Chromosome[] chromosomes = this.getInfeasible(false);
+		    this._pop.remove(chromosomes[0]);
+		}
+	
+		//add the new chromosome
+		this._pop.add(c);
     }
 }

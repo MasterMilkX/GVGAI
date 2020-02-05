@@ -93,6 +93,8 @@ public class ADPChildRunner {
 		double compareThresh = Double.parseDouble(parameters.get("constraintsThreshold")); 
 		double entropyProb = Double.parseDouble(parameters.get("derivFitnessProb"));
 		int donothingCt = Integer.parseInt(parameters.get("doNothingTestCt"));
+		double eliteProb = Double.parseDouble(parameters.get("eliteProb"));
+		int infeasibleCt = Integer.parseInt(parameters.get("infeasibleCt"));
 
 		//import the game list
 		HashMap<Integer, String[]> gameList = readGamesCSV(parameters.get("gameListCSV"));
@@ -103,8 +105,9 @@ public class ADPChildRunner {
 		
 		
 		//just to setup the static variables for chromosome
-		new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"), idealTime, compareThresh);
-		
+		//new MapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"), idealTime, compareThresh);
+		new CMEMapElites(gameName, gameLoc, seed, coinFlip, parameters.get("generatorFolder"), parameters.get("tutorialFolder"), idealTime, compareThresh, eliteProb, infeasibleCt);
+
 		
 		/////////////		START OF TUTORIAL LEVEL GENERATION   	/////////////////
 		Chromosome[] chromosomes = null;

@@ -1,6 +1,4 @@
 [
     {"condition":"Collides","action":"TransformTo","sprite2":"key","sprite1":"nokey"},
-    {"condition":"Collides","action":"KillSprite","sprite2":"monsterQuick","sprite1":"nokey"},
-    {"condition":"Collides","action":"KillSprite","sprite2":"monsterNormal","sprite1":"nokey"},
-    {"condition":"Collides","action":"KillSprite","sprite2":"monsterSlow","sprite1":"nokey"}
+    {"condition":"Collides","action":"KillSprite","sprite2":"sword","sprite1":"*"}
 ]
